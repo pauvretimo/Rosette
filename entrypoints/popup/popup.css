@@ -1,0 +1,103 @@
+:root {
+  --bg-0: #0a0e18;
+  --bg-1: #121a2c;
+  --bg-2: #1a2540;
+  --border: #283253;
+  --text: #edf2fb;
+  --text-muted: #8b98b8;
+  --accent: #8fd9ff;
+  --accent-strong: #c9f3ff;
+  --rainbow: linear-gradient(
+    90deg,
+    #ff5f6d,
+    #ffc371,
+    #f9f871,
+    #6dd5a8,
+    #4facfe,
+    #a17fe0,
+    #ff6fd8
+  );
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 280px;
+  font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 14px;
+  background: radial-gradient(circle at 20% 0%, #16213a 0%, var(--bg-0) 60%);
+  color: var(--text);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.header img {
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 0 5px rgba(143, 217, 255, 0.5));
+}
+
+.header .title {
+  font-size: 15px;
+  font-weight: 700;
+  background: var(--rainbow);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.empty-state {
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.toggle-row:hover {
+  border-color: var(--accent);
+}
+
+.toggle-row input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  flex: none;
+}
+
+.toggle-row span {
+  color: var(--text);
+}
+
+.options-link {
+  display: block;
+  margin-top: 10px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.options-link:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
+}

@@ -1,0 +1,4 @@
+# Deployment artifacts, not source — each is a Mozilla-signed binary specific to one release.
+updates/*.xpi
+updates/updates.json
+.env

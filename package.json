@@ -1,0 +1,24 @@
+{
+  "name": "rosette",
+  "description": "Auto-translate Discord messages locally with Bergamot, cached and encrypted on-device.",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox --mv3",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox --mv3",
+    "compile": "tsc --noEmit",
+    "postinstall": "wxt prepare"
+  },
+  "dependencies": {
+    "franc-min": "^6.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "wxt": "^0.19.13"
+  }
+}

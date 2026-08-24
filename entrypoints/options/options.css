@@ -1,0 +1,213 @@
+:root {
+  --bg-0: #0a0e18;
+  --bg-1: #121a2c;
+  --bg-2: #1a2540;
+  --border: #283253;
+  --text: #edf2fb;
+  --text-muted: #8b98b8;
+  --accent: #8fd9ff;
+  --accent-strong: #c9f3ff;
+  --danger: #ff8fa3;
+  --rainbow: linear-gradient(
+    90deg,
+    #ff5f6d,
+    #ffc371,
+    #f9f871,
+    #6dd5a8,
+    #4facfe,
+    #a17fe0,
+    #ff6fd8
+  );
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 3rem;
+  background: radial-gradient(circle at 15% 0%, #16213a 0%, var(--bg-0) 55%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.header .mark {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 0 6px rgba(143, 217, 255, 0.55));
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.01em;
+  background: var(--rainbow);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rosette-shift 8s linear infinite;
+}
+
+@keyframes rosette-shift {
+  to {
+    background-position: 200% center;
+  }
+}
+
+h2 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin: 0 0 0.6rem;
+}
+
+.card {
+  background: linear-gradient(180deg, var(--bg-1), var(--bg-1) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.card + .card {
+  margin-top: 1rem;
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 0 0 0.75rem;
+  line-height: 1.45;
+}
+
+label {
+  color: var(--text);
+}
+
+select {
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  font: inherit;
+  margin-left: 0.4rem;
+}
+
+select:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.checkbox-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem 1rem;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+ul.scope-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+ul.scope-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+ul.scope-list li.empty {
+  color: var(--text-muted);
+  font-style: italic;
+  justify-content: flex-start;
+}
+
+button {
+  font: inherit;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text);
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: #202c4c;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+button.btn-danger {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.75rem;
+  color: var(--danger);
+  border-color: transparent;
+  background: transparent;
+}
+
+button.btn-danger:hover:not(:disabled) {
+  background: rgba(255, 143, 163, 0.12);
+  border-color: rgba(255, 143, 163, 0.4);
+}
+
+button.btn-primary {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, #1c2c4d, #16233f);
+}
+
+button.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #223559, #1a2846);
+}
+
+label.display-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}

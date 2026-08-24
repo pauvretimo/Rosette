@@ -1,0 +1,104 @@
+.rosette-translation-container {
+  margin-top: 2px;
+}
+
+/* Primary content: the translation takes the visual place the original held, using Discord's
+   own theming variables so it matches whatever theme (dark/light/custom) the user has. */
+.rosette-translation-container .rosette-translated {
+  color: var(--text-default, var(--text-normal, #dbdee1));
+  font-size: 1rem;
+  line-height: 1.375rem;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* Secondary content: the original, demoted to a smaller, muted, indented note underneath so it
+   reads as a different, less-accentuated plane than the translation above it. */
+.rosette-translation-container .rosette-original {
+  margin-top: 4px;
+  padding: 2px 0 0 6px;
+  border-left: 2px solid var(--background-modifier-accent, #4a4a4a);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--text-muted, #949ba4);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* A brief self-dismissing note for manual translate requests that didn't produce a translation
+   (already in the target language, undetectable, failed) — so an explicit click never resolves
+   in total silence. */
+.rosette-translation-container .rosette-status {
+  margin-top: 4px;
+  padding: 2px 0 0 6px;
+  border-left: 2px solid var(--background-modifier-accent, #4a4a4a);
+  font-size: 0.75rem;
+  color: var(--text-muted, #949ba4);
+  font-style: italic;
+}
+
+/* Rosette's own themed card (navy/icy-cyan), distinct from Discord's own UI on purpose — this is
+   an interactive Rosette control, not a native message element. */
+.rosette-lang-picker {
+  margin-top: 4px;
+  padding: 8px 10px;
+  background: #121a2c;
+  border: 1px solid #283253;
+  border-radius: 8px;
+  max-width: 360px;
+}
+
+.rosette-lang-picker-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.75rem;
+  color: #8b98b8;
+}
+
+.rosette-lang-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rosette-lang-picker-select {
+  flex: 1;
+  background: #1a2540;
+  color: #edf2fb;
+  border: 1px solid #283253;
+  border-radius: 6px;
+  padding: 3px 6px;
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.rosette-lang-picker-button {
+  font: inherit;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #8fd9ff;
+  background: linear-gradient(180deg, #1c2c4d, #16233f);
+  color: #8fd9ff;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+.rosette-lang-picker-button:hover {
+  background: linear-gradient(180deg, #223559, #1a2846);
+}
+
+/* Discord's own menu items get their hover highlight from JS-driven state (tracking which item
+   is "active" for keyboard nav), not plain CSS :hover — our cloned item was never registered
+   with that system, so it needs its own hover rule to get any visual feedback at all. */
+.rosette-context-menu-item {
+  cursor: pointer;
+}
+
+.rosette-context-menu-item:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 95, 109, 0.22),
+    rgba(79, 172, 254, 0.22),
+    rgba(161, 127, 224, 0.22)
+  ) !important;
+}

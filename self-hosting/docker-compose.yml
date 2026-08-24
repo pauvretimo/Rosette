@@ -1,0 +1,20 @@
+services:
+  rosette-updates:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./updates:/usr/share/nginx/html/rosette:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.rosette-updates.rule=Host(`${ROSETTE_UPDATES_DOMAIN}`)
+      - traefik.http.routers.rosette-updates.entrypoints=websecure
+      - traefik.http.routers.rosette-updates.tls.certresolver=${TRAEFIK_CERT_RESOLVER}
+      - traefik.http.services.rosette-updates.loadbalancer.server.port=80
+
+networks:
+  traefik:
+    name: ${TRAEFIK_NETWORK}
+    external: true

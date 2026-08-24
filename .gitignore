@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# WXT build output and generated types
+.output/
+.wxt/
+
+# Env files (none at project root currently, but keep this defensive —
+# self-hosting/ has its own .gitignore for its own .env)
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS cruft
+.DS_Store
+Thumbs.db

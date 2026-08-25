@@ -58,8 +58,21 @@ export default defineConfig({
               // it's how Firefox matches an install against entries in the self-hosted update
               // manifest below.
               id: '{b5751384-29c3-4f70-81b8-13d13fc36870}',
-              strict_min_version: '121.0',
+              // Raised from 121.0: data_collection_permissions below (mandatory since Nov 2025)
+              // is only recognized by Firefox 140+ desktop / 142+ Android — an older
+              // strict_min_version makes AMO warn that the key is unsupported by versions this
+              // add-on claims to support. 142.0 is the higher of the two floors, covering both.
+              strict_min_version: '142.0',
               update_url: `https://${updatesDomain}/rosette/firefox/updates.json`,
+              // Mozilla-mandated disclosure (required for all new extensions since Nov 2025).
+              // Genuinely "none": translation runs entirely locally via WASM, the cache never
+              // leaves the device, and the only network calls are downloading public Bergamot
+              // model files and Discord's own page you're already on — no telemetry, no
+              // analytics, nothing transmitted anywhere. Once shipped, this key must keep being
+              // set in every future version, even if that stays true.
+              data_collection_permissions: {
+                required: ['none'],
+              },
             },
           },
         }

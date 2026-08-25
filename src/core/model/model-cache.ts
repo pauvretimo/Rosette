@@ -1,9 +1,28 @@
-import type { GetModelResponse, ModelFilesPayload } from '../messaging/protocol';
+import type { DownloadStateEntry, GetModelResponse, ModelFilesPayload } from '../messaging/protocol';
 import { idbGet, idbPut, STORE_MODEL_BLOBS } from '../cache/db';
 import { xhrGetArrayBuffer } from '../net/xhr';
 import { getRegistry, resolveEntry, resolveFileUrl, type RegistryEntry } from './model-registry';
 
 type Role = keyof ModelFilesPayload;
+
+// sourceLang-destLang -> in-flight. Background-context-only, in-memory (no need to survive a
+// restart — a popup reopened after the background was evicted just sees an empty set, which is
+// correct since nothing is actually downloading at that point either).
+const activeDownloads = new Map<string, DownloadStateEntry>();
+const downloadStateListeners = new Set<() => void>();
+
+export function getActiveDownloads(): DownloadStateEntry[] {
+  return [...activeDownloads.values()];
+}
+
+export function onDownloadStateChange(listener: () => void): () => void {
+  downloadStateListeners.add(listener);
+  return () => downloadStateListeners.delete(listener);
+}
+
+function notifyDownloadStateChange(): void {
+  for (const listener of downloadStateListeners) listener();
+}
 
 interface CachedBlob {
   bytes: ArrayBuffer;
@@ -64,30 +83,47 @@ export async function ensureModelFiles(sourceLang: string, destLang: string): Pr
 
   const versionHash = entry.files.model.uncompressedHash ?? '';
   const roles = rolesForEntry(entry);
+  const pairKey = `${sourceLang}-${destLang}`;
+  let markedActive = false;
 
-  const files = {} as ModelFilesPayload;
-  for (const { role, path } of roles) {
-    const key = blobKey(sourceLang, destLang, role);
-    const cached = await idbGet<CachedBlob>(STORE_MODEL_BLOBS, key);
+  try {
+    const files = {} as ModelFilesPayload;
+    for (const { role, path } of roles) {
+      const key = blobKey(sourceLang, destLang, role);
+      const cached = await idbGet<CachedBlob>(STORE_MODEL_BLOBS, key);
 
-    if (cached && cached.versionHash === versionHash) {
-      files[role] = cached.bytes;
-      continue;
-    }
-
-    const bytes = await fetchAndDecompress(resolveFileUrl(registry, path));
-
-    if (role === 'model' && entry.files.model.uncompressedHash) {
-      const actualHash = await sha256Hex(bytes);
-      if (actualHash !== entry.files.model.uncompressedHash) {
-        throw new Error(`Model file hash mismatch for ${sourceLang}-${destLang} (expected ${entry.files.model.uncompressedHash}, got ${actualHash})`);
+      if (cached && cached.versionHash === versionHash) {
+        files[role] = cached.bytes;
+        continue;
       }
+
+      // Only surface a download as "active" once a fetch is actually about to happen — an
+      // all-cache-hit call (the common case) should never flash a spinner in the popup.
+      if (!markedActive) {
+        markedActive = true;
+        activeDownloads.set(pairKey, { sourceLang, destLang });
+        notifyDownloadStateChange();
+      }
+
+      const bytes = await fetchAndDecompress(resolveFileUrl(registry, path));
+
+      if (role === 'model' && entry.files.model.uncompressedHash) {
+        const actualHash = await sha256Hex(bytes);
+        if (actualHash !== entry.files.model.uncompressedHash) {
+          throw new Error(`Model file hash mismatch for ${sourceLang}-${destLang} (expected ${entry.files.model.uncompressedHash}, got ${actualHash})`);
+        }
+      }
+
+      const toStore: CachedBlob = { bytes, versionHash, cachedAt: Date.now() };
+      await idbPut(STORE_MODEL_BLOBS, key, toStore);
+      files[role] = bytes;
     }
 
-    const toStore: CachedBlob = { bytes, versionHash, cachedAt: Date.now() };
-    await idbPut(STORE_MODEL_BLOBS, key, toStore);
-    files[role] = bytes;
+    return { architecture: entry.architecture, files };
+  } finally {
+    if (markedActive) {
+      activeDownloads.delete(pairKey);
+      notifyDownloadStateChange();
+    }
   }
-
-  return { architecture: entry.architecture, files };
 }

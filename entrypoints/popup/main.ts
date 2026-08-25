@@ -1,8 +1,35 @@
+import type { DownloadStateChangedMessage, DownloadStateEntry } from '../../src/core/messaging/protocol';
+import { callBackground } from '../../src/core/messaging/rpc';
+import { LANGUAGE_OPTIONS } from '../../src/core/settings/language-options';
 import { channelScopeKey } from '../../src/core/settings/settings-schema';
 import { getSettings, updateSettings } from '../../src/core/settings/settings-store';
 import { parseScopeFromUrl } from '../../src/adapters/discord/discord-url';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
+
+function languageLabel(code: string): string {
+  return LANGUAGE_OPTIONS.find((opt) => opt.code === code)?.label ?? code;
+}
+
+function buildDownloadBanner(active: DownloadStateEntry[]): HTMLDivElement | null {
+  if (active.length === 0) return null;
+
+  const banner = document.createElement('div');
+  banner.className = 'download-banner';
+
+  const spinner = document.createElement('span');
+  spinner.className = 'spinner';
+  banner.appendChild(spinner);
+
+  const text = document.createElement('span');
+  text.textContent =
+    active.length === 1
+      ? `Downloading ${languageLabel(active[0].sourceLang)} → ${languageLabel(active[0].destLang)} model…`
+      : `Downloading ${active.length} translation models…`;
+  banner.appendChild(text);
+
+  return banner;
+}
 
 function buildHeader(): HTMLDivElement {
   const header = document.createElement('div');
@@ -28,6 +55,10 @@ async function render() {
 
   app.innerHTML = '';
   app.appendChild(buildHeader());
+
+  const active = await callBackground({ type: 'GET_DOWNLOAD_STATE' });
+  const banner = buildDownloadBanner(active);
+  if (banner) app.appendChild(banner);
 
   if (!scope) {
     const empty = document.createElement('p');
@@ -97,5 +128,14 @@ function buildToggleRow(label: string, checked: boolean, onChange: () => void): 
 
   return row;
 }
+
+// The download banner is the only thing that can change while the popup is sitting open (toggle
+// changes already re-render on their own click handler), so a live update just re-runs render()
+// rather than needing finer-grained state tracking.
+browser.runtime.onMessage.addListener((message: unknown) => {
+  if ((message as DownloadStateChangedMessage | undefined)?.type === 'MODEL_DOWNLOAD_STATE_CHANGED') {
+    render();
+  }
+});
 
 render();

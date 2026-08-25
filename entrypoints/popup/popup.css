@@ -25,6 +25,7 @@
 
 body {
   width: 280px;
+  max-width: 100%;
   font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
   margin: 0;
   padding: 14px;
@@ -100,4 +101,93 @@ body {
 .options-link:hover {
   color: var(--accent-strong);
   text-decoration: underline;
+}
+
+.download-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.spinner {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  animation: rosette-spin 0.7s linear infinite;
+}
+
+@keyframes rosette-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Firefox for Android renders the browser-action popup as a full page rather than an anchored
+   dropdown, so the fixed desktop-dropdown width/font-size below reads as tiny text stranded in a
+   huge page instead of a compact popup — size up for touch instead. */
+@media (max-width: 480px), (pointer: coarse) {
+  body {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    font-size: 17px;
+    padding: 20px 16px;
+  }
+
+  .header {
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .header img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header .title {
+    font-size: 22px;
+  }
+
+  .toggle-row {
+    padding: 14px 12px;
+    gap: 12px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+  }
+
+  .toggle-row input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+  }
+
+  .download-banner {
+    padding: 12px;
+    font-size: 15px;
+    gap: 10px;
+  }
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border-width: 3px;
+  }
+
+  .options-link {
+    font-size: 16px;
+    margin-top: 16px;
+  }
+
+  .empty-state {
+    font-size: 16px;
+  }
 }

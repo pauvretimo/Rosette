@@ -41,7 +41,10 @@ project root [README.md](../README.md).
    **unlisted**. Wait for automated review; you get back a signed `.xpi`. Mandatory, non-optional
    — nothing here can skip it.
 3. `node generate-firefox-manifest.mjs <version> <path-to-signed.xpi>` — copies the xpi into
-   `updates/firefox/`, computes its sha256, updates `updates/firefox/updates.json`.
+   `updates/firefox/`, computes its sha256, updates `updates/firefox/updates.json`. The second
+   argument also accepts the direct download URL from AMO's "your extension has been approved"
+   page (`https://addons.mozilla.org/firefox/downloads/file/...xpi`) — the script fetches it
+   itself, so there's no need to download the file by hand first and hunt for its local path.
 4. Nothing to restart — the container serves the updated directory immediately. Existing installs
    pick it up on their next background check (roughly daily, and on browser restart). First-time
    installs still need the signed `.xpi` downloaded and opened once — share a direct link, e.g.

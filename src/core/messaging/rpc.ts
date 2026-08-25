@@ -1,15 +1,22 @@
-import type { BackgroundRequest, BackgroundRequestMap } from './protocol';
+import type { BackgroundRequest, BackgroundRequestMap, DownloadStateChangedMessage } from './protocol';
 
 /**
- * Typed wrapper around browser.runtime.sendMessage for the content-script -> background
- * direction. Background only ever replies to requests; it never initiates messages to the
- * content script (model-download progress is polled via GET_MODEL, not pushed), so this is
- * the only RPC helper the project needs for now.
+ * Typed wrapper around browser.runtime.sendMessage for the content-script/popup -> background
+ * request/response direction.
  */
 export async function callBackground<T extends BackgroundRequest>(
   request: T,
 ): Promise<BackgroundRequestMap[T['type']]['res']> {
   return browser.runtime.sendMessage(request);
+}
+
+/**
+ * Background -> any open extension page (currently just the popup, for live download-state
+ * updates). Fire-and-forget: `sendMessage` rejects when nothing is listening (e.g. no popup
+ * open), which is the expected common case, not an error.
+ */
+export function broadcastFromBackground(message: DownloadStateChangedMessage): void {
+  browser.runtime.sendMessage(message).catch(() => {});
 }
 
 type Handler<K extends keyof BackgroundRequestMap> = (

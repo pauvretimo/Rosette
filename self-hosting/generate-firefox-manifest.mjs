@@ -4,24 +4,45 @@
 // straight out of wxt.config.ts, and the hosting domain out of the project root's .env — the
 // same .env wxt.config.ts itself reads at build time, so the two can't drift apart.
 //
-// Usage: node generate-firefox-manifest.mjs <version> <path-to-signed.xpi> [minFirefoxVersion]
+// <path-to-signed.xpi> accepts either a local file path or the direct AMO download URL from the
+// "Your extension has been approved" page — an env var isn't a good fit here since that URL's
+// file id/hash slug is different every release, so there'd be nothing durable to store.
+//
+// Usage: node generate-firefox-manifest.mjs <version> <path-or-url-to-signed.xpi> [minFirefoxVersion]
 // Example: node generate-firefox-manifest.mjs 0.2.0 ~/Downloads/rosette-0.2.0-fx.xpi 121.0
+// Example: node generate-firefox-manifest.mjs 0.2.0 https://addons.mozilla.org/firefox/downloads/file/.../x.xpi
 
 import { createHash } from 'node:crypto';
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const [, , version, xpiPath, minFirefoxVersion = '121.0'] = process.argv;
+// Default kept in sync with wxt.config.ts's gecko.strict_min_version (142.0, required for
+// data_collection_permissions support) — override via the 3rd arg if a build ever ships a
+// different floor.
+const [, , version, xpiPath, minFirefoxVersion = '142.0'] = process.argv;
 
 if (!version || !xpiPath) {
-  console.error('Usage: node generate-firefox-manifest.mjs <version> <path-to-signed.xpi> [minFirefoxVersion]');
+  console.error('Usage: node generate-firefox-manifest.mjs <version> <path-or-url-to-signed.xpi> [minFirefoxVersion]');
   process.exit(1);
 }
-if (!existsSync(xpiPath)) {
+
+const isUrl = /^https?:\/\//i.test(xpiPath);
+if (!isUrl && !existsSync(xpiPath)) {
   console.error(`File not found: ${xpiPath}`);
   process.exit(1);
+}
+
+async function readXpiBytes() {
+  if (!isUrl) return readFileSync(xpiPath);
+  console.log(`Downloading ${xpiPath} ...`);
+  const res = await fetch(xpiPath);
+  if (!res.ok) {
+    console.error(`GET ${xpiPath} failed: HTTP ${res.status}`);
+    process.exit(1);
+  }
+  return Buffer.from(await res.arrayBuffer());
 }
 
 function loadEnvFile(path) {
@@ -57,12 +78,14 @@ if (!idMatch) {
 }
 const geckoId = idMatch[1];
 
+const xpiBytes = await readXpiBytes();
+
 const updatesDir = join(here, 'updates', 'firefox');
 mkdirSync(updatesDir, { recursive: true });
 const xpiFileName = `rosette-${version}.xpi`;
-copyFileSync(xpiPath, join(updatesDir, xpiFileName));
+writeFileSync(join(updatesDir, xpiFileName), xpiBytes);
 
-const hash = createHash('sha256').update(readFileSync(xpiPath)).digest('hex');
+const hash = createHash('sha256').update(xpiBytes).digest('hex');
 
 const manifestPath = join(updatesDir, 'updates.json');
 const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : { addons: {} };

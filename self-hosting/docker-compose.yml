@@ -9,8 +9,10 @@ services:
       - traefik
     labels:
       - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK}
       - traefik.http.routers.rosette-updates.rule=Host(`${ROSETTE_UPDATES_DOMAIN}`)
-      - traefik.http.routers.rosette-updates.entrypoints=websecure
+      - traefik.http.routers.rosette-updates.entrypoints=web,websecure
+      - traefik.http.routers.rosette-updates.tls=true
       - traefik.http.routers.rosette-updates.tls.certresolver=${TRAEFIK_CERT_RESOLVER}
       - traefik.http.services.rosette-updates.loadbalancer.server.port=80
 

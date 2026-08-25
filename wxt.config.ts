@@ -1,4 +1,31 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'wxt';
+
+// Single .env at the project root — self-hosting/docker-compose.yml is invoked with
+// `--env-file ../.env` (see package.json's self-host:* scripts) specifically so this stays the
+// only place the domain is ever written down, instead of a second copy self-hosting/ would need.
+function loadEnvFile(path: string): Record<string, string> {
+  if (!existsSync(path)) return {};
+  const env: Record<string, string> = {};
+  for (const line of readFileSync(path, 'utf8').split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq === -1) continue;
+    env[trimmed.slice(0, eq).trim()] = trimmed.slice(eq + 1).trim();
+  }
+  return env;
+}
+
+const here = dirname(fileURLToPath(import.meta.url));
+const env = { ...loadEnvFile(join(here, '.env')), ...process.env };
+// Falls back to a clearly-fake placeholder so a fresh clone still builds without self-hosting
+// set up — real distribution builds should have the root .env filled in first.
+const updatesDomain = env.ROSETTE_UPDATES_DOMAIN && env.ROSETTE_UPDATES_DOMAIN !== 'updates.example.com'
+  ? env.ROSETTE_UPDATES_DOMAIN
+  : 'updates.example.com';
 
 export default defineConfig({
   srcDir: '.',
@@ -32,14 +59,17 @@ export default defineConfig({
               // manifest below.
               id: '{b5751384-29c3-4f70-81b8-13d13fc36870}',
               strict_min_version: '121.0',
-              // TODO: replace updates.example.com with the same ROSETTE_UPDATES_DOMAIN you set
-              // in self-hosting/.env before submitting a signed build for distribution — this
-              // file can't read .env itself (it's build-time, not deploy-time), so the two have
-              // to be kept in sync by hand. generate-manifest.mjs warns if they drift.
-              update_url: 'https://updates.example.com/rosette/updates.json',
+              update_url: `https://${updatesDomain}/rosette/firefox/updates.json`,
             },
           },
         }
-      : {}),
+      : {
+          // Chrome-only, top-level (not nested like Firefox's browser_specific_settings).
+          // Chrome only honors this for extensions installed via ExtensionInstallForcelist
+          // policy — see self-hosting/README.md for what has to be true on the client machine
+          // for that policy to even apply (domain-join / Entra ID / Chrome Enterprise Core
+          // enrollment; regular unmanaged Chrome on Windows/macOS ignores it).
+          update_url: `https://${updatesDomain}/rosette/chrome/updates.xml`,
+        }),
   }),
 });

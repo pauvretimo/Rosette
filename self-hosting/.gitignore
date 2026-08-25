@@ -1,4 +1,13 @@
-# Deployment artifacts, not source — each is a Mozilla-signed binary specific to one release.
-updates/*.xpi
-updates/updates.json
+# Deployment artifacts, not source — regenerated from AMO's / your own signing output each release.
+updates/firefox/*.xpi
+updates/firefox/updates.json
+updates/chrome/*.crx
+updates/chrome/updates.xml
+
+# The Chrome signing key — losing this is fine (generate a new one), leaking it is not: anyone
+# with it can sign updates Chrome will trust as this extension. Never commit it, anywhere.
+*.pem
+
+# Config lives in the project root's .env (see ../.env.example) — nothing here reads a
+# self-hosting/.env, but ignore one defensively in case a habit from elsewhere creates one.
 .env

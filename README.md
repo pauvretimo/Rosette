@@ -58,16 +58,20 @@ injection, since several of them look like bugs if you don't know why they're th
 Bump the version in `package.json` first. Then:
 
 **Chromium** — `npm run zip` → `.output/rosette-<version>-chrome.zip`. Either submit to the
-Chrome Web Store, or for personal/unmanaged use, unzip and **Load unpacked** (see above) — Chrome
-only supports true self-hosted auto-updates via Enterprise Policy on managed devices.
+Chrome Web Store, or for personal/unmanaged use, unzip and **Load unpacked** (see above). True
+self-hosted auto-updates need `ExtensionInstallForcelist` policy, which Windows/macOS only honor
+on a managed device (domain-joined, Entra ID, or the free Chrome Enterprise Core) — Linux is the
+one platform where an unmanaged install still honors it. See
+**[self-hosting/README.md](./self-hosting/README.md)** if that applies to you; it covers packing
+and signing your own `.crx` (Chrome has no external signing authority like AMO).
 
 **Firefox** — `npm run zip:firefox` → produces the extension zip *and* a matching sources zip
 (AMO requires the source when a submission bundles built/minified code, which ours does). Submit
 both on the [AMO Developer Hub](https://addons.mozilla.org/developers/) as **unlisted** — this is
 mandatory even for self-hosting, since stock Firefox refuses unsigned extensions. You get back a
 signed `.xpi`. From there, **[self-hosting/README.md](./self-hosting/README.md)** covers hosting
-it yourself (Docker + Traefik) with working auto-updates, including a script that generates the
-update manifest for you.
+it yourself (Docker + Traefik) with working auto-updates for both browsers, including scripts
+that generate each update manifest for you.
 
 ## Maintenance
 

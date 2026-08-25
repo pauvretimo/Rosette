@@ -12,7 +12,10 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox --mv3",
     "compile": "tsc --noEmit",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "self-host:up": "docker compose --env-file .env -f self-hosting/docker-compose.yml up -d",
+    "self-host:down": "docker compose --env-file .env -f self-hosting/docker-compose.yml down",
+    "self-host:logs": "docker compose --env-file .env -f self-hosting/docker-compose.yml logs -f"
   },
   "dependencies": {
     "franc-min": "^6.2.0"
